@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
+import BoardList from './components/board'
+import NewBoardForm from './components/NewBoardForm'
+
+
+const URL = "http://127.0.0.1:5000/boards"
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [boards, setBoards] = useState([])
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    // its supposed to only show form on create or something? have to research. set to true to toggle modal
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    // stores board we're currently editing
+    const [currentBoard, setCurrentBoard] = useState({})
+
+    const fetchBoards = async () => {
+        try {
+            const response = await fetch(URL)
+            const data = await response.json()
+            setBoards(data.boards)
+            console.log(data.boards)
+        } catch (error) {
+            console.error("Failed to fetch boards:", error)
+        }
+    }
+
+    useEffect(() => {
+        fetchBoards()
+    }, [])
+
+    const closeModal = () => {
+        setIsModalOpen(false)
+        // resets currentBoard object when closing modal
+        setCurrentBoard({})
+    }
+
+    const openCreateModal = () => {
+        if (!isModalOpen) setIsModalOpen(true)
+    }
+
+    const openEditModal = (board) => {
+        if (isModalOpen) return
+        setCurrentBoard(board)
+        setIsModalOpen(true)
+    }
+
+    // whats actually happening when we create an update
+    const onUpdate = () => {
+        closeModal()
+        fetchBoards()
+    }
+
+    return <>
+    <BoardList boards={boards} updateBoard={openEditModal} updateCallback={onUpdate}/>
+    <button onClick={openCreateModal}>Create New Board</button>
+    {isModalOpen && (
+        <div className="modal">
+            <div className="modal-content">
+                <span className="close" onClick={closeModal}>&times;</span>
+                <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
+            </div>
+        </div>
+    )}
+</>
+
 }
 
 export default App
