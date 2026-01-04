@@ -3,46 +3,18 @@ import './App.css'
 import BoardList from './components/Board'
 import NewBoardForm from './components/NewBoardForm'
 import Card from './components/Card.jsx'
-// import axios from 'axios';
-
 
 const URL = "http://127.0.0.1:5000/boards"
 
-const initialCards = [
-  {
-    id: 1,
-    message: 'Ship early, iterate often.',
-    likes: 3,
-    author: 'Ada',
-    tag: 'Product',
-  },
-  {
-    id: 2,
-    message: 'Good design is as little design as possible.',
-    likes: 5,
-    author: 'Dieter Rams',
-    tag: 'Design',
-  },
-  {
-    id: 3,
-    message: 'Programs must be written for people to read.',
-    likes: 2,
-    author: 'Harold Abelson',
-    tag: 'Engineering',
-  },
-]
-
-
-
 function App() {
   const [boards, setBoards] = useState([])
-
   // its supposed to only show form on create or something? have to research. set to true to toggle modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   // stores board we're currently editing
   const [currentBoard, setCurrentBoard] = useState({})
-  const [cards, setCards] = useState(initialCards)
-
+  const [cards, setCards] = useState([])
+  const [selectedBoardId, setSelectedBoardId] = useState(null)
+  const [loadingCards, setLoadingCards] = useState(false)
 
   const handleLikeCard = (cardId) => {
     setCards((prevCards) => {
@@ -56,8 +28,6 @@ function App() {
     })
   }
 
-
-
   const fetchBoards = async () => {
     try {
       const response = await fetch(URL)
@@ -66,6 +36,32 @@ function App() {
       console.log(data.boards)
     } catch (error) {
       console.error("Failed to fetch boards:", error)
+    }
+  }
+
+  const fetchCardsForBoard = async (boardId) => {
+    setLoadingCards(true)
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/boards/${boardId}/cards`)
+      const data = await response.json()
+      setCards(data.cards)
+      console.log("Cards for board:", data.cards)
+    } catch (error) {
+      console.error("Failed to fetch cards:", error)
+      setCards([])
+    } finally {
+      setLoadingCards(false)
+    }
+  }
+
+  const handleSelectBoard = (boardId) => {
+    // If clicking the same board, deselect it
+    if (selectedBoardId === boardId) {
+      setSelectedBoardId(null)
+      setCards([])
+    } else {
+      setSelectedBoardId(boardId)
+      fetchCardsForBoard(boardId)
     }
   }
 
@@ -88,14 +84,11 @@ function App() {
     setCurrentBoard(board)
     setIsModalOpen(true)
   }
-
-  // whats actually happening when we create an update
+    // whats actually happening when we create an update
   const onUpdate = () => {
     closeModal()
     fetchBoards()
   }
-
-
 
   return (
     <main className="app" aria-labelledby="app-title">
@@ -110,7 +103,13 @@ function App() {
 
       <section className="boards-section" aria-label="Boards">
         <div className="boards-container">
-          <BoardList boards={boards} updateBoard={openEditModal} updateCallback={onUpdate} />
+          <BoardList 
+            boards={boards} 
+            updateBoard={openEditModal} 
+            updateCallback={onUpdate}
+            onSelectBoard={handleSelectBoard}
+            selectedBoardId={selectedBoardId}
+          />
           <button onClick={openCreateModal}>Create New Board</button>
           {isModalOpen && (
             <div className="modal">
@@ -123,26 +122,37 @@ function App() {
         </div>
       </section>
 
-
-
       <section
         className="cards-section"
         aria-label="Cards for selected board"
       >
-        <h2 className="section-title">Cards</h2>
-        <div className="cards-container">
-          {cards.map((card) => (
-            <Card
-              key={card.id}
-              card={card}
-              onLike={() => handleLikeCard(card.id)}
-            />
-          ))}
-        </div>
+        {selectedBoardId ? (
+          <>
+            <h2 className="section-title">
+              Cards for {boards.find(b => b.id === selectedBoardId)?.title || 'Selected Board'}
+            </h2>
+            {loadingCards ? (
+              <p>Loading cards...</p>
+            ) : cards.length > 0 ? (
+              <div className="cards-container">
+                {cards.map((card) => (
+                  <Card
+                    key={card.id}
+                    card={card}
+                    onLike={() => handleLikeCard(card.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>No cards yet for this board.</p>
+            )}
+          </>
+        ) : (
+          <p>Select a board to view its cards</p>
+        )}
       </section>
-
-    </main>)
-
+    </main>
+  )
 }
 
 export default App

@@ -1,7 +1,8 @@
 import React from "react";
 
+
 // whenever we perform update we'll call update callback & whenever we want to update contact, we'll call function with contact we want to update
-const BoardList = ({ boards, updateBoard, updateCallback }) => {
+const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selectedBoardId }) => {
     const onDelete = async (id) => {
         try {
             const options = {
@@ -17,27 +18,39 @@ const BoardList = ({ boards, updateBoard, updateCallback }) => {
             alert(error)
         }
     }
-
-
-    // how it renders our boards
+// how it renders our boards
     return <div className="board-list">
-        <h2 className="section-title">Boards</h2>
+        <h2>Boards</h2>
         {/* presents it as a table-- what are the other ways to present info? */}
         <table>
             <thead>
                 <tr>
                     <th>board name</th>
                     <th>board owner</th>
+                    <th>actions</th>
                 </tr>
             </thead>
             <tbody>
                 {/* function maps all the boards we have & returns new row for them */}
                 {boards.map((board) => (
                     // use key whenever we have dynamic data
-                    <tr key={board.id}>
+                    <tr 
+                        key={board.id}
+                        className={selectedBoardId === board.id ? 'selected-board' : ''}
+                    >
                         {/* table data for all the entries i want to show */}
-                        <td>{board.title}</td>
-                        <td>{board.owner}</td>
+                        <td 
+                            onClick={() => onSelectBoard(board.id)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {board.title}
+                        </td>
+                        <td 
+                            onClick={() => onSelectBoard(board.id)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {board.owner}
+                        </td>
                         <td>
                             {/* clicking the button calls updateBoard with the board we want updated-- this opens the modal that allows us to update contact */}
                             <button onClick={() => updateBoard(board)}>Update</button>
