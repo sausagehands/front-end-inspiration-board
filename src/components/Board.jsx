@@ -20,8 +20,8 @@ const BoardList = ({ boards, updateBoard, updateCallback }) => {
 
 
     // how it renders our boards
-    return <div>
-        <h2>Boards</h2>
+    return <div className="board-list">
+        <h2 className="section-title">Boards</h2>
         {/* presents it as a table-- what are the other ways to present info? */}
         <table>
             <thead>
