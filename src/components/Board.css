@@ -1,0 +1,139 @@
+/* Board Component Styling - Matches Card Theme */
+
+
+.board-list {
+  background-color: #1f2933;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  transition: transform 150ms ease, box-shadow 150ms ease,
+    border-color 150ms ease, background-color 150ms ease;
+}
+
+
+.board-list h2 {
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+/* Table Container */
+.board-list table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #1f2933;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  margin-bottom: 1rem;
+}
+
+/* Table Header */
+.board-list thead {
+  background-color: #111827;
+}
+
+.board-list thead tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.board-list th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a5b4fc;
+}
+
+/* Table Body */
+.board-list tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  transition: background-color 150ms ease;
+}
+
+.board-list tbody tr:last-child {
+  border-bottom: none;
+}
+
+.board-list tbody tr:hover {
+  background-color: #111827;
+}
+
+.board-list tbody tr:hover td[style*="cursor: pointer"] {
+  color: #a5b4fc;
+}
+
+.board-list td {
+  padding: 1rem 1.5rem;
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  transition: color 150ms ease;
+}
+
+.board-list td[style*="cursor: pointer"] {
+  cursor: pointer;
+}
+
+/* Selected board styling */
+.board-list .selected-board {
+  background-color: rgba(129, 140, 248, 0.15) !important;
+  border-left: 3px solid #818cf8;
+}
+
+.board-list .selected-board:hover {
+  background-color: rgba(129, 140, 248, 0.2) !important;
+}
+
+/* Action Buttons in Table */
+.board-list td button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  margin-right: 0.5rem;
+}
+
+.board-list td button:last-child {
+  margin-right: 0;
+}
+
+/* Update button - first button in actions cell */
+.board-list td button:nth-child(1) {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.5);
+}
+
+.board-list td button:nth-child(1):hover {
+  background-color: rgba(129, 140, 248, 0.25);
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.5);
+}
+
+/* Delete button - second button in actions cell */
+.board-list td button:nth-child(2) {
+  background: rgba(248, 113, 113, 0.15);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.6);
+}
+
+.board-list td button:nth-child(2):hover {
+  background-color: rgba(248, 113, 113, 0.2);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.5);
+}
+
+.board-list td button:active {
+  transform: scale(0.96);
+}
