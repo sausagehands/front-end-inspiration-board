@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 //import Board from './components/Board.jsx';
-//import NewBoardForm from './components/NewBoardForm.jsx';
+import NewBoardForm from './components/NewBoardForm.jsx';
+import BoardList from './components/Board';
 import Card from './components/Card.jsx';
 import './App.css';
 import axios from 'axios';
@@ -8,40 +9,7 @@ import axios from 'axios';
 //const kbaseURL = 'http://localhost:3000/boards'; 
 // getAPIresponse function to fetch data from the API
 
-
-const initialCards = [
-  {
-    id: 1,
-    message: 'Ship early, iterate often.',
-    likes: 3,
-    author: 'Ada',
-    tag: 'Product',
-  },
-  {
-    id: 2,
-    message: 'Good design is as little design as possible.',
-    likes: 5,
-    author: 'Dieter Rams',
-    tag: 'Design',
-  },
-  {
-    id: 3,
-    message: 'Programs must be written for people to read.',
-    likes: 2,
-    author: 'Harold Abelson',
-    tag: 'Engineering',
-  },
-]
-
-function App() {
-  const [cards, setCards] = useState(initialCards)
-import { useState, useEffect } from 'react'
-import './App.css'
-import BoardList from './components/Board'
-import NewBoardForm from './components/NewBoardForm'
-import Card from './components/Card.jsx'
-
-const URL = "http://127.0.0.1:5000/boards"
+const URL = "http://127.0.0.1:5000/boards";
 
 function App() {
   const [boards, setBoards] = useState([])
@@ -113,7 +81,8 @@ function App() {
   }
 
   const openCreateModal = () => {
-    if (!isModalOpen) setIsModalOpen(true)
+    setCurrentBoard({})
+    setIsModalOpen(true)
   }
 
   const openEditModal = (board) => {
@@ -154,8 +123,8 @@ function App() {
           />
           <button onClick={openCreateModal}>Create New Board</button>
           {isModalOpen && (
-            <div className="modal">
-              <div className="modal-content">
+            <div className="modal" onClick={closeModal}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <span className="close" onClick={closeModal}>&times;</span>
                 <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
               </div>
@@ -168,16 +137,6 @@ function App() {
         className="cards-section"
         aria-label="Cards for selected board"
       >
-        <h2 className="section-title">Cards</h2>
-        <div className="cards-container">
-          {cards.map((card) => (
-            <Card
-              key={card.id}
-              card={card}
-              onLike={() => handleLikeCard(card.id)}
-            />
-          ))}
-        </div>
         {selectedBoardId ? (
           <>
             <h2 className="section-title">
@@ -207,4 +166,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

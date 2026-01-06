@@ -23,6 +23,14 @@
   float: right;
   font-size: 28px;
   font-weight: bold;
+  cursor: pointer;
+  line-height: 20px;
+  transition: color 0.2s;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
 }
 
 /* Layout for the whole app */

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // going to do calback before we do any functions
 const NewBoardForm = ({ existingBoard = {}, updateCallback }) => {
@@ -7,16 +7,27 @@ const NewBoardForm = ({ existingBoard = {}, updateCallback }) => {
     //if you  passed as an object that has at least one entry inside, we're updating it because it means we have existing data
     const updating = Object.entries(existingBoard).length !== 0
 
+    // Update form fields when existingBoard changes
+    useEffect(() => {
+        setTitle(existingBoard.title || "");
+        setOwner(existingBoard.owner || "");
+    }, [existingBoard])
+
     const onSubmit = async (e) => {
         // to not refresh the page onSubmit
         e.preventDefault()
 
-        // corresponds with what we're looking for in API when we create new board
-        const data = {
-            title,
-            owner
+        // Validate form fields
+        if (!title.trim() || !owner.trim()) {
+            alert("Please fill in both title and owner fields")
+            return
         }
 
+        // corresponds with what we're looking for in API when we create new board
+        const data = {
+            title: title.trim(),
+            owner: owner.trim()
+        }
 
         // const URL = "http://127.0.0.1:5000/create_board"
         // changes URL based on if we're updating or creating
@@ -34,18 +45,35 @@ const NewBoardForm = ({ existingBoard = {}, updateCallback }) => {
             // const data is a js object, like in python, we have to convert to valid json object
             body: JSON.stringify(data)
         }
-        // sends the request
-        const response = await fetch(URL, options)
-        // if not valid response, alert user of error
-        if (response.status !== 201 && response.status !== 200) {
-            const data = await response.json()
-            alert(data.message)
-        } else {
-            // tells app.jsx-- hey, we finished this. we created or updated
-            // closes modal & allows us to update data we see in board list
-            updateCallback()
-        }
 
+        try {
+            console.log("Submitting form:", { URL, data, updating })
+            // sends the request
+            const response = await fetch(URL, options)
+            console.log("Response status:", response.status)
+            
+            // if not valid response, alert user of error
+            if (response.status !== 201 && response.status !== 200) {
+                let errorMessage = "Failed to create/update board"
+                try {
+                    const errorData = await response.json()
+                    errorMessage = errorData.message || errorMessage
+                    console.error("Error response:", errorData)
+                } catch (parseError) {
+                    errorMessage = `Error: ${response.status} ${response.statusText}`
+                    console.error("Failed to parse error response:", parseError)
+                }
+                alert(errorMessage)
+            } else {
+                console.log("Board created/updated successfully")
+                // tells app.jsx-- hey, we finished this. we created or updated
+                // closes modal & allows us to update data we see in board list
+                updateCallback()
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error)
+            alert(`Network error: ${error.message}. Please check if the backend server is running.`)
+        }
     }
 
     return (
