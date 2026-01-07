@@ -1,15 +1,12 @@
-import { useEffect, useState } from 'react';
-//import Board from './components/Board.jsx';
+import { useEffect, useState, useCallback } from 'react';
 import NewBoardForm from './components/NewBoardForm.jsx';
+import NewCardForm from './components/NewCardForm.jsx';
 import BoardList from './components/Board';
 import Card from './components/Card.jsx';
 import './App.css';
-import axios from 'axios';
 
-//const kbaseURL = 'http://localhost:3000/boards'; 
-// getAPIresponse function to fetch data from the API
 
-const URL = "http://127.0.0.1:5000/boards";
+const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
 
 function App() {
   const [boards, setBoards] = useState([])
@@ -21,36 +18,84 @@ function App() {
   const [selectedBoardId, setSelectedBoardId] = useState(null)
   const [loadingCards, setLoadingCards] = useState(false)
 
-  const handleLikeCard = (cardId) => {
-    setCards((prevCards) => {
-      return prevCards.map((card) => {
-        if (card.id === cardId) {
-          return { ...card, likes: card.likes + 1 }
-        } else {
-          return card
-        }
+  const handleLikeCard = async (cardId) => {
+    try {
+      const response = await fetch(`${BASE_URL}/cards/${cardId}/like`, {
+        method: "PATCH",
       })
-    })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+      const newLikesFromApi = data.card?.likes ?? data.likes
+
+      setCards((prevCards) =>
+        prevCards.map((card) =>
+          card.id === cardId
+            ? {
+                ...card,
+                likes:
+                  typeof newLikesFromApi === "number"
+                    ? newLikesFromApi
+                    : (card.likes || 0) + 1,
+              }
+            : card
+        )
+      )
+    } catch (error) {
+      console.error("Failed to like card:", error)
+    }
   }
 
-  const fetchBoards = async () => {
+  const handleDeleteCard = async (cardId) => {
     try {
-      const response = await fetch(URL)
+      const response = await fetch(`${BASE_URL}/cards/${cardId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      setCards((prevCards) => prevCards.filter((card) => card.id !== cardId))
+    } catch (error) {
+      console.error("Failed to delete card:", error)
+    }
+  }
+
+  const handleCardCreated = () => {
+    if (selectedBoardId) {
+      fetchCardsForBoard(selectedBoardId);
+    }
+  }
+
+  const fetchBoards = useCallback(async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/boards`)
       const data = await response.json()
-      setBoards(data.boards)
-      console.log(data.boards)
+      const boardsData = Array.isArray(data) ? data : (data.boards || [])
+      setBoards(boardsData)
+      console.log(boardsData)
     } catch (error) {
       console.error("Failed to fetch boards:", error)
     }
-  }
+  }, [])
 
   const fetchCardsForBoard = async (boardId) => {
     setLoadingCards(true)
     try {
-      const response = await fetch(`http://127.0.0.1:5000/boards/${boardId}/cards`)
+  
+      const response = await fetch(`${BASE_URL}/boards/${boardId}/cards`)
       const data = await response.json()
-      setCards(data.cards)
-      console.log("Cards for board:", data.cards)
+      const cardsData = data
+      const normalizedCards = cardsData.map((card) => ({
+        id: card.id,
+        message: card.message,
+        likes: card.likes ?? card.like_count ?? 0
+      }))
+      setCards(normalizedCards)
     } catch (error) {
       console.error("Failed to fetch cards:", error)
       setCards([])
@@ -72,7 +117,7 @@ function App() {
 
   useEffect(() => {
     fetchBoards()
-  }, [])
+  }, [fetchBoards])
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -102,17 +147,9 @@ function App() {
         <h1 id="app-title" className="app-title">
           Inspiration Board
         </h1>
-        <p className="app-subtitle">
-          Our goal is to create a digital inspiration board with multiple boards and cards.
-        </p>
       </header>
 
       <section className="boards-section" aria-label="Boards">
-        <h2 className="section-title">Boards</h2>
-        {/* list of boards here. selecting a board will show its cards. */}
-        <p className="section-placeholder">
-          Boards list will go here. Select a board to see its associated cards.
-        </p>
         <div className="boards-container">
           <BoardList 
             boards={boards} 
@@ -121,7 +158,12 @@ function App() {
             onSelectBoard={handleSelectBoard}
             selectedBoardId={selectedBoardId}
           />
-          <button onClick={openCreateModal}>Create New Board</button>
+          <button
+            onClick={openCreateModal}
+            className="primary-action-button"
+          >
+            Create New Board
+          </button>
           {isModalOpen && (
             <div className="modal" onClick={closeModal}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -151,12 +193,14 @@ function App() {
                     key={card.id}
                     card={card}
                     onLike={() => handleLikeCard(card.id)}
+                    onDelete={() => handleDeleteCard(card.id)}
                   />
                 ))}
               </div>
             ) : (
-              <p>No cards yet for this board.</p>
+              <p>No cards yet for this board. Create one above!</p>
             )}
+            <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
           </>
         ) : (
           <p>Select a board to view its cards</p>

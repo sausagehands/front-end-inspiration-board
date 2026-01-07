@@ -1,5 +1,8 @@
 import React from "react";
+import './Board.css';
 
+
+const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
 
 // whenever we perform update we'll call update callback & whenever we want to update contact, we'll call function with contact we want to update
 const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selectedBoardId }) => {
@@ -7,21 +10,19 @@ const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selecte
         try {
             const options = {
                 method: "DELETE"
+            };
+            const response = await fetch(`${BASE_URL}/boards/${id}`, options);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`)
             }
-            const response = await fetch(`http://127.0.0.1:5000/delete_board/${id}`, options)
-            if (response.status === 200) {
-                updateCallback()
-            } else {
-                console.error("Failed to delete")
-            }
+            updateCallback();
         } catch (error) {
-            alert(error)
+            console.error("Failed to delete board:", error);
         }
     }
 // how it renders our boards
     return <div className="board-list">
         <h2>Boards</h2>
-        {/* presents it as a table-- what are the other ways to present info? */}
         <table>
             <thead>
                 <tr>
@@ -31,14 +32,11 @@ const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selecte
                 </tr>
             </thead>
             <tbody>
-                {/* function maps all the boards we have & returns new row for them */}
-                {boards.map((board) => (
-                    // use key whenever we have dynamic data
+                {boards.map((board) => (               
                     <tr 
                         key={board.id}
                         className={selectedBoardId === board.id ? 'selected-board' : ''}
                     >
-                        {/* table data for all the entries i want to show */}
                         <td 
                             onClick={() => onSelectBoard(board.id)}
                             style={{ cursor: 'pointer' }}
@@ -52,7 +50,6 @@ const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selecte
                             {board.owner}
                         </td>
                         <td>
-                            {/* clicking the button calls updateBoard with the board we want updated-- this opens the modal that allows us to update contact */}
                             <button onClick={() => updateBoard(board)}>Update</button>
                             <button onClick={() => onDelete(board.id)}>Delete</button>
                         </td>
