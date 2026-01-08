@@ -1,6 +1,7 @@
 import { useState } from "react";
+import axios from "axios";
 
-const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
+const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 const NewCardForm = ({ boardId, updateCallback }) => {
     const [message, setMessage] = useState("");
@@ -20,25 +21,10 @@ const NewCardForm = ({ boardId, updateCallback }) => {
         setMessageError("");
 
         try {
-            const URL = `${BASE_URL}/boards/${boardId}/cards`;
-            const options = {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ message: trimmedMessage })
-            };
-
-            const response = await fetch(URL, options);
-            console.log("Response status:", response.status);
-
-            if (response.status !== 201) {
-                console.error("Failed to create card, status:", response.status);
-            } else {
-
-                setMessage("");
-                updateCallback();
-            }
+            const url = `${BASE_URL}/boards/${boardId}/cards`;
+            await axios.post(url, { message: trimmedMessage });
+            setMessage("");
+            updateCallback();
         } catch (error) {
             console.error("Error creating card:", error);
         } finally {
