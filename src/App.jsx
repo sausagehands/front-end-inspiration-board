@@ -35,12 +35,12 @@ function App() {
         prevCards.map((card) =>
           card.id === cardId
             ? {
-                ...card,
-                likes:
-                  typeof newLikesFromApi === "number"
-                    ? newLikesFromApi
-                    : (card.likes || 0) + 1,
-              }
+              ...card,
+              likes:
+                typeof newLikesFromApi === "number"
+                  ? newLikesFromApi
+                  : (card.likes || 0) + 1,
+            }
             : card
         )
       )
@@ -86,7 +86,7 @@ function App() {
   const fetchCardsForBoard = async (boardId) => {
     setLoadingCards(true)
     try {
-  
+
       const response = await fetch(`${BASE_URL}/boards/${boardId}/cards`)
       const data = await response.json()
       const cardsData = data
@@ -135,7 +135,7 @@ function App() {
     setCurrentBoard(board)
     setIsModalOpen(true)
   }
-    // whats actually happening when we create an update
+  // whats actually happening when we create an update
   const onUpdate = () => {
     closeModal()
     fetchBoards()
@@ -153,9 +153,9 @@ function App() {
         {/* Left Column - Boards */}
         <section className="boards-section" aria-label="Boards">
           <div className="boards-container">
-            <BoardList 
-              boards={boards} 
-              updateBoard={openEditModal} 
+            <BoardList
+              boards={boards}
+              updateBoard={openEditModal}
               updateCallback={onUpdate}
               onSelectBoard={handleSelectBoard}
               selectedBoardId={selectedBoardId}
@@ -182,7 +182,7 @@ function App() {
           {selectedBoardId ? (
             <>
               <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
-              
+
               <section
                 className="cards-section"
                 aria-label="Cards for selected board"
@@ -213,6 +213,10 @@ function App() {
           )}
         </div>
       </div>
+
+      <footer className="app-footer">
+        <p>C24 - Group 6 - Madi, Lexy, Alice, Bianca</p>
+      </footer>
     </main>
   )
 }
