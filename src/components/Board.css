@@ -7,6 +7,8 @@
   gap: 0.75rem;
   text-align: left;
   border: 1px solid rgba(148, 163, 184, 0.4);
+  max-height: 500px;
+  min-height: 0;
 }
 
 .board-list:hover {
@@ -18,6 +20,7 @@
   margin-bottom: 1rem;
   font-size: 1.5rem;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 /* Table Container */
@@ -25,10 +28,24 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 0.75rem;
+  overflow-y: auto;
+  display: block;
+  max-height: calc(500px - 100px);
+}
+
+.board-list thead,
+.board-list tbody {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .board-list thead {
   background-color: #2e1065;
+  position: sticky;
+  top: 0;
+  background-color: #2e1065;
+  z-index: 10;
 }
 
 .board-list thead tr {
