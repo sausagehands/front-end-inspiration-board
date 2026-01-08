@@ -149,63 +149,70 @@ function App() {
         </h1>
       </header>
 
-      <section className="boards-section" aria-label="Boards">
-        <div className="boards-container">
-          <BoardList 
-            boards={boards} 
-            updateBoard={openEditModal} 
-            updateCallback={onUpdate}
-            onSelectBoard={handleSelectBoard}
-            selectedBoardId={selectedBoardId}
-          />
-          <button
-            onClick={openCreateModal}
-            className="primary-action-button"
-          >
-            Create New Board
-          </button>
-          {isModalOpen && (
-            <div className="modal" onClick={closeModal}>
-              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <span className="close" onClick={closeModal}>&times;</span>
-                <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
+      <div className="main-content">
+        {/* Left Column - Boards */}
+        <section className="boards-section" aria-label="Boards">
+          <div className="boards-container">
+            <BoardList 
+              boards={boards} 
+              updateBoard={openEditModal} 
+              updateCallback={onUpdate}
+              onSelectBoard={handleSelectBoard}
+              selectedBoardId={selectedBoardId}
+            />
+            <button
+              onClick={openCreateModal}
+              className="primary-action-button create-board-button"
+            >
+              Create New Board
+            </button>
+            {isModalOpen && (
+              <div className="modal" onClick={closeModal}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <span className="close" onClick={closeModal}>&times;</span>
+                  <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
+                </div>
               </div>
-            </div>
+            )}
+          </div>
+        </section>
+
+        {/* Right Column - Card Form and Cards */}
+        <div className="right-column">
+          {selectedBoardId ? (
+            <>
+              <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
+              
+              <section
+                className="cards-section"
+                aria-label="Cards for selected board"
+              >
+                <h2 className="section-title">
+                  Cards for {boards.find(b => b.id === selectedBoardId)?.title || 'Selected Board'}
+                </h2>
+                {loadingCards ? (
+                  <p>Loading cards...</p>
+                ) : cards.length > 0 ? (
+                  <div className="cards-container">
+                    {cards.map((card) => (
+                      <Card
+                        key={card.id}
+                        card={card}
+                        onLike={() => handleLikeCard(card.id)}
+                        onDelete={() => handleDeleteCard(card.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p>No cards yet for this board. Create one above!</p>
+                )}
+              </section>
+            </>
+          ) : (
+            <p className="section-placeholder">Select a board to view and create cards</p>
           )}
         </div>
-      </section>
-
-      <section
-        className="cards-section"
-        aria-label="Cards for selected board"
-      >
-        {selectedBoardId ? (
-          <>
-            <h2 className="section-title">
-              Cards for {boards.find(b => b.id === selectedBoardId)?.title || 'Selected Board'}
-            </h2>
-            {loadingCards ? (
-              <p>Loading cards...</p>
-            ) : cards.length > 0 ? (
-              <div className="cards-container">
-                {cards.map((card) => (
-                  <Card
-                    key={card.id}
-                    card={card}
-                    onLike={() => handleLikeCard(card.id)}
-                    onDelete={() => handleDeleteCard(card.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p>No cards yet for this board. Create one above!</p>
-            )}
-            <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
-          </>
-        ) : (
-          <p>Select a board to view its cards</p>
-        )}
-      </section>
+      </div>
     </main>
   )
 }

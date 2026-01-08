@@ -43,7 +43,7 @@
 
 /* Layout for the whole app */
 .app {
-  max-width: 1024px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1.5rem 2.5rem;
   width: 100%;
@@ -66,9 +66,29 @@
   margin: 0;
 }
 
-.boards-section,
-.cards-section {
+/* Main content layout - Two columns */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
   margin-top: 1.5rem;
+}
+
+/* Left column - Boards */
+.boards-section {
+  margin-top: 0;
+  grid-column: 1;
+}
+
+/* Right column container */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cards-section {
+  margin-top: 0;
 }
 
 .section-title {
@@ -108,11 +128,18 @@
   text-align: center;
 }
 
+.create-board-button {
+  background-color: rgba(70, 66, 127);
+  border: 1px solid rgba(167, 139, 250, 0.8);
+}
+
+
 .primary-action-button:hover {
   background-color: rgba(129, 140, 248, 0.55);
 }
 
-.primary-action-button:active {
+.create-board-button:hover {
+  background-color: rgba(85, 84, 160);
 }
 
 .primary-action-button:disabled {
@@ -138,7 +165,7 @@
 
 /* New Card form */
 .new-card-form {
-  margin-top: 1rem;
+  margin-top: 0;
   padding: 2rem 2rem 2rem 2rem;
   background-color: #1e1035;
   border-radius: 12px;
@@ -184,10 +211,19 @@
   background-color: #1f2933;
   color: #e5e7eb;
   font-size: 0.95rem;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
+/* Responsive: stack on smaller screens */
+@media (max-width: 768px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
 
+  .boards-section {
+    grid-column: auto;
+  }
+}
 
 @media (max-width: 640px) {
   .app {

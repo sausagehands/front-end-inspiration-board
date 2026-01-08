@@ -1,5 +1,6 @@
 import React from "react";
 import './Board.css';
+import PropTypes from "prop-types";
 
 
 const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
@@ -59,5 +60,19 @@ const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selecte
         </table>
     </div>
 }
+
+BoardList.propTypes = {
+    boards: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            title: PropTypes.string.isRequired,
+            owner: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    updateBoard: PropTypes.func.isRequired,
+    updateCallback: PropTypes.func.isRequired,
+    onSelectBoard: PropTypes.func.isRequired,
+    selectedBoardId: PropTypes.number.isRequired
+};
 
 export default BoardList;

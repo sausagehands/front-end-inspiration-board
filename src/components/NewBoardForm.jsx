@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
 
@@ -102,6 +103,15 @@ const NewBoardForm = ({ existingBoard = {}, updateCallback }) => {
             </button>
         </form>
     );
+};
+
+NewBoardForm.propTypes = {
+    existingBoard: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        title: PropTypes.string.isRequired,
+        owner: PropTypes.string.isRequired
+    }),
+    updateCallback: PropTypes.func.isRequired
 };
 
 export default NewBoardForm
