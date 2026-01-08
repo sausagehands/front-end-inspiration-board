@@ -1,27 +1,19 @@
-import React from "react";
-import './Board.css';
 import PropTypes from "prop-types";
+import axios from 'axios';
+import './Board.css';
 
+const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
-
-// whenever we perform update we'll call update callback & whenever we want to update contact, we'll call function with contact we want to update
 const BoardList = ({ boards, updateBoard, updateCallback, onSelectBoard, selectedBoardId }) => {
     const onDelete = async (id) => {
         try {
-            const options = {
-                method: "DELETE"
-            };
-            const response = await fetch(`${BASE_URL}/boards/${id}`, options);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`)
-            }
+            await axios.delete(`${BASE_URL}/boards/${id}`)
             updateCallback();
         } catch (error) {
             console.error("Failed to delete board:", error);
         }
     }
-// how it renders our boards
+
     return <div className="board-list">
         <h2>Boards</h2>
         <table>
@@ -72,7 +64,7 @@ BoardList.propTypes = {
     updateBoard: PropTypes.func.isRequired,
     updateCallback: PropTypes.func.isRequired,
     onSelectBoard: PropTypes.func.isRequired,
-    selectedBoardId: PropTypes.number.isRequired
+    selectedBoardId: PropTypes.number
 };
 
 export default BoardList;

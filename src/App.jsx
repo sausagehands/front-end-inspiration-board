@@ -1,18 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
 import NewBoardForm from './components/NewBoardForm.jsx';
 import NewCardForm from './components/NewCardForm.jsx';
 import BoardList from './components/Board';
 import Card from './components/Card.jsx';
 import './App.css';
 
-
-const BASE_URL = "https://back-end-inspiration-board-vz3n.onrender.com";
+const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 function App() {
   const [boards, setBoards] = useState([])
-  // its supposed to only show form on create or something? have to research. set to true to toggle modal
   const [isModalOpen, setIsModalOpen] = useState(false)
-  // stores board we're currently editing
   const [currentBoard, setCurrentBoard] = useState({})
   const [cards, setCards] = useState([])
   const [selectedBoardId, setSelectedBoardId] = useState(null)
@@ -20,27 +18,19 @@ function App() {
 
   const handleLikeCard = async (cardId) => {
     try {
-      const response = await fetch(`${BASE_URL}/cards/${cardId}/like`, {
-        method: "PATCH",
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const data = await response.json()
-      const newLikesFromApi = data.card?.likes ?? data.likes
+      const response = await axios.patch(`${BASE_URL}/cards/${cardId}/like`)
+      const newLikesFromApi = response.data.card?.likes ?? response.data.likes
 
       setCards((prevCards) =>
         prevCards.map((card) =>
           card.id === cardId
             ? {
-              ...card,
-              likes:
-                typeof newLikesFromApi === "number"
-                  ? newLikesFromApi
-                  : (card.likes || 0) + 1,
-            }
+                ...card,
+                likes:
+                  typeof newLikesFromApi === "number"
+                    ? newLikesFromApi
+                    : (card.likes || 0) + 1,
+              }
             : card
         )
       )
@@ -51,14 +41,7 @@ function App() {
 
   const handleDeleteCard = async (cardId) => {
     try {
-      const response = await fetch(`${BASE_URL}/cards/${cardId}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
+      await axios.delete(`${BASE_URL}/cards/${cardId}`)
       setCards((prevCards) => prevCards.filter((card) => card.id !== cardId))
     } catch (error) {
       console.error("Failed to delete card:", error)
@@ -73,9 +56,8 @@ function App() {
 
   const fetchBoards = useCallback(async () => {
     try {
-      const response = await fetch(`${BASE_URL}/boards`)
-      const data = await response.json()
-      const boardsData = Array.isArray(data) ? data : (data.boards || [])
+      const response = await axios.get(`${BASE_URL}/boards`)
+      const boardsData = Array.isArray(response.data) ? response.data : (response.data.boards || [])
       setBoards(boardsData)
       console.log(boardsData)
     } catch (error) {
@@ -86,10 +68,8 @@ function App() {
   const fetchCardsForBoard = async (boardId) => {
     setLoadingCards(true)
     try {
-
-      const response = await fetch(`${BASE_URL}/boards/${boardId}/cards`)
-      const data = await response.json()
-      const cardsData = data
+      const response = await axios.get(`${BASE_URL}/boards/${boardId}/cards`)
+      const cardsData = response.data
       const normalizedCards = cardsData.map((card) => ({
         id: card.id,
         message: card.message,
@@ -105,7 +85,6 @@ function App() {
   }
 
   const handleSelectBoard = (boardId) => {
-    // If clicking the same board, deselect it
     if (selectedBoardId === boardId) {
       setSelectedBoardId(null)
       setCards([])
@@ -121,7 +100,6 @@ function App() {
 
   const closeModal = () => {
     setIsModalOpen(false)
-    // resets currentBoard object when closing modal
     setCurrentBoard({})
   }
 
@@ -135,7 +113,7 @@ function App() {
     setCurrentBoard(board)
     setIsModalOpen(true)
   }
-  // whats actually happening when we create an update
+
   const onUpdate = () => {
     closeModal()
     fetchBoards()
@@ -153,9 +131,9 @@ function App() {
         {/* Left Column - Boards */}
         <section className="boards-section" aria-label="Boards">
           <div className="boards-container">
-            <BoardList
-              boards={boards}
-              updateBoard={openEditModal}
+            <BoardList 
+              boards={boards} 
+              updateBoard={openEditModal} 
               updateCallback={onUpdate}
               onSelectBoard={handleSelectBoard}
               selectedBoardId={selectedBoardId}
@@ -182,7 +160,7 @@ function App() {
           {selectedBoardId ? (
             <>
               <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
-
+              
               <section
                 className="cards-section"
                 aria-label="Cards for selected board"
@@ -215,7 +193,7 @@ function App() {
       </div>
 
       <footer className="app-footer">
-        <p>C24 - Group 6 - Madi, Lexy, Alice, Bianca</p>
+        <p>&copy; 2025 Inspiration Board. All rights reserved.</p>
       </footer>
     </main>
   )
