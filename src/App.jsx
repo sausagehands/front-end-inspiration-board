@@ -9,194 +9,192 @@ import './App.css';
 const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 function App() {
-    const [boards, setBoards] = useState([])
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [currentBoard, setCurrentBoard] = useState({})
-    const [cards, setCards] = useState([])
-    const [selectedBoardId, setSelectedBoardId] = useState(null)
-    const [loadingCards, setLoadingCards] = useState(false)
+  const [boards, setBoards] = useState([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentBoard, setCurrentBoard] = useState({})
+  const [cards, setCards] = useState([])
+  const [selectedBoardId, setSelectedBoardId] = useState(null)
+  const [loadingCards, setLoadingCards] = useState(false)
 
-    const handleLikeCard = async (cardId) => {
-        try {
-            const response = await axios.patch(`${BASE_URL}/cards/${cardId}/like`)
-            const newLikesFromApi = response.data.card?.likes ?? response.data.likes
+  const handleLikeCard = async (cardId) => {
+    try {
+      const response = await axios.patch(`${BASE_URL}/cards/${cardId}/like`)
+      const newLikesFromApi = response.data.card?.likes ?? response.data.likes
 
-            setCards((prevCards) =>
-                prevCards.map((card) =>
-                    card.id === cardId
-                        ? {
-                            ...card,
-                            likes:
-                                typeof newLikesFromApi === "number"
-                                    ? newLikesFromApi
-                                    : (card.likes || 0) + 1,
-                        }
-                        : card
-                )
-            )
-        } catch (error) {
-            console.error("Failed to like card:", error)
-        }
+      setCards((prevCards) =>
+        prevCards.map((card) =>
+          card.id === cardId
+            ? {
+                ...card,
+                likes:
+                  typeof newLikesFromApi === "number"
+                    ? newLikesFromApi
+                    : (card.likes || 0) + 1,
+              }
+            : card
+        )
+      )
+    } catch (error) {
+      console.error("Failed to like card:", error)
     }
+  }
 
-    const handleDeleteCard = async (cardId) => {
-        try {
-            await axios.delete(`${BASE_URL}/cards/${cardId}`)
-            setCards((prevCards) => prevCards.filter((card) => card.id !== cardId))
-        } catch (error) {
-            console.error("Failed to delete card:", error)
-        }
+  const handleDeleteCard = async (cardId) => {
+    try {
+      await axios.delete(`${BASE_URL}/cards/${cardId}`)
+      setCards((prevCards) => prevCards.filter((card) => card.id !== cardId))
+    } catch (error) {
+      console.error("Failed to delete card:", error)
     }
+  }
 
-    const handleCardCreated = () => {
-        if (selectedBoardId) {
-            fetchCardsForBoard(selectedBoardId);
-        }
+  const handleCardCreated = () => {
+    if (selectedBoardId) {
+      fetchCardsForBoard(selectedBoardId);
     }
+  }
 
-    const fetchBoards = useCallback(async () => {
-        try {
-            const response = await axios.get(`${BASE_URL}/boards`)
-            const boardsData = Array.isArray(response.data) ? response.data : (response.data.boards || [])
-            setBoards(boardsData)
-            console.log(boardsData)
-        } catch (error) {
-            console.error("Failed to fetch boards:", error)
-        }
-    }, [])
-
-    const fetchCardsForBoard = async (boardId) => {
-        setLoadingCards(true)
-        try {
-            const response = await axios.get(`${BASE_URL}/boards/${boardId}/cards`)
-            const cardsData = response.data
-            const normalizedCards = cardsData.map((card) => ({
-                id: card.id,
-                message: card.message,
-                likes: card.likes ?? card.like_count ?? 0
-            }))
-            setCards(normalizedCards)
-        } catch (error) {
-            console.error("Failed to fetch cards:", error)
-            setCards([])
-        } finally {
-            setLoadingCards(false)
-        }
+  const fetchBoards = useCallback(async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/boards`)
+      const boardsData = Array.isArray(response.data) ? response.data : (response.data.boards || [])
+      setBoards(boardsData)
+      console.log(boardsData)
+    } catch (error) {
+      console.error("Failed to fetch boards:", error)
     }
+  }, [])
 
-    const handleSelectBoard = (boardId) => {
-        if (selectedBoardId === boardId) {
-            setSelectedBoardId(null)
-            setCards([])
-        } else {
-            setSelectedBoardId(boardId)
-            fetchCardsForBoard(boardId)
-        }
+  const fetchCardsForBoard = async (boardId) => {
+    setLoadingCards(true)
+    try {
+      const response = await axios.get(`${BASE_URL}/boards/${boardId}/cards`)
+      const cardsData = response.data
+      const normalizedCards = cardsData.map((card) => ({
+        id: card.id,
+        message: card.message,
+        likes: card.likes ?? card.like_count ?? 0
+      }))
+      setCards(normalizedCards)
+    } catch (error) {
+      console.error("Failed to fetch cards:", error)
+      setCards([])
+    } finally {
+      setLoadingCards(false)
     }
+  }
 
-    useEffect(() => {
-        fetchBoards()
-    }, [fetchBoards])
-
-    const closeModal = () => {
-        setIsModalOpen(false)
-        setCurrentBoard({})
+  const handleSelectBoard = (boardId) => {
+    if (selectedBoardId === boardId) {
+      setSelectedBoardId(null)
+      setCards([])
+    } else {
+      setSelectedBoardId(boardId)
+      fetchCardsForBoard(boardId)
     }
+  }
 
-    const openCreateModal = () => {
-        setCurrentBoard({})
-        setIsModalOpen(true)
-    }
+  useEffect(() => {
+    fetchBoards()
+  }, [fetchBoards])
 
-    const openEditModal = (board) => {
-        if (isModalOpen) return
-        setCurrentBoard(board)
-        setIsModalOpen(true)
-    }
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setCurrentBoard({})
+  }
 
-    const onUpdate = () => {
-        closeModal()
-        fetchBoards()
-    }
+  const openCreateModal = () => {
+    setCurrentBoard({})
+    setIsModalOpen(true)
+  }
 
-    return (
-        <main className="app" aria-labelledby="app-title">
-            <header className="app-header">
-                <h1 id="app-title" className="app-title">
-                    Inspiration Board
-                </h1>
-            </header>
+  const openEditModal = (board) => {
+    if (isModalOpen) return
+    setCurrentBoard(board)
+    setIsModalOpen(true)
+  }
 
-            <div className="main-content">
-                {/* Left Column - Boards */}
-                <section className="boards-section" aria-label="Boards">
-                    <div className="boards-container">
-                        <BoardList
-                            boards={boards}
-                            updateBoard={openEditModal}
-                            updateCallback={onUpdate}
-                            onSelectBoard={handleSelectBoard}
-                            selectedBoardId={selectedBoardId}
-                        />
-                        <button
-                            onClick={openCreateModal}
-                            className="primary-action-button create-board-button"
-                        >
-                            Create New Board
-                        </button>
-                        {isModalOpen && (
-                            <div className="modal" onClick={closeModal}>
-                                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                                    <span className="close" onClick={closeModal}>&times;</span>
-                                    <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
+  const onUpdate = () => {
+    closeModal()
+    fetchBoards()
+  }
 
-                {/* Right Column - Card Form and Cards */}
-                <div className="right-column">
-                    {selectedBoardId ? (
-                        <>
-                            <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
+  return (
+    <main className="app" aria-labelledby="app-title">
+      <header className="app-header">
+        <h1 id="app-title" className="app-title">
+          Inspiration Board
+        </h1>
+      </header>
 
-                            <section
-                                className="cards-section"
-                                aria-label="Cards for selected board"
-                            >
-                                <h2 className="section-title">
-                                    Cards for {boards.find(b => b.id === selectedBoardId)?.title || 'Selected Board'}
-                                </h2>
-                                {loadingCards ? (
-                                    <p>Loading cards...</p>
-                                ) : cards.length > 0 ? (
-                                    <div className="cards-container">
-                                        {cards.map((card) => (
-                                            <Card
-                                                key={card.id}
-                                                card={card}
-                                                onLike={() => handleLikeCard(card.id)}
-                                                onDelete={() => handleDeleteCard(card.id)}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p>No cards yet for this board. Create one above!</p>
-                                )}
-                            </section>
-                        </>
-                    ) : (
-                        <p className="section-placeholder">Select a board to view and create cards</p>
-                    )}
+      <div className="main-content">
+        <section className="boards-section" aria-label="Boards">
+          <div className="boards-container">
+            <BoardList 
+              boards={boards} 
+              updateBoard={openEditModal} 
+              updateCallback={onUpdate}
+              onSelectBoard={handleSelectBoard}
+              selectedBoardId={selectedBoardId}
+            />
+            <button
+              onClick={openCreateModal}
+              className="primary-action-button create-board-button"
+            >
+              Create New Board
+            </button>
+            {isModalOpen && (
+              <div className="modal" onClick={closeModal}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <span className="close" onClick={closeModal}>&times;</span>
+                  <NewBoardForm existingBoard={currentBoard} updateCallback={onUpdate} />
                 </div>
-            </div>
+              </div>
+            )}
+          </div>
+        </section>
 
-            <footer className="app-footer">
-                <p>&copy; C24 - Group 6 - Madi, Lexy, Alice, Bianca</p>
-            </footer>
-        </main>
-    )
+        <div className="right-column">
+          {selectedBoardId ? (
+            <>
+              <NewCardForm boardId={selectedBoardId} updateCallback={handleCardCreated} />
+              
+              <section
+                className="cards-section"
+                aria-label="Cards for selected board"
+              >
+                <h2 className="section-title">
+                  Cards for {boards.find(b => b.id === selectedBoardId)?.title}
+                </h2>
+                {loadingCards ? (
+                  <p>Loading cards...</p>
+                ) : cards.length > 0 ? (
+                  <div className="cards-container">
+                    {cards.map((card) => (
+                      <Card
+                        key={card.id}
+                        card={card}
+                        onLike={() => handleLikeCard(card.id)}
+                        onDelete={() => handleDeleteCard(card.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p>No cards yet for this board. Create one above!</p>
+                )}
+              </section>
+            </>
+          ) : (
+            <p className="section-placeholder">Select a board to view and create cards</p>
+          )}
+        </div>
+      </div>
+
+      <footer className="app-footer">
+        <p> 2025 Inspiration Board. Group6- Bianca, Madi, Alice, Lexy </p>
+      </footer>
+    </main>
+  )
 }
 
 export default App;

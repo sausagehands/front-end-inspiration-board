@@ -37,7 +37,11 @@ function Card({ card, onLike, onDelete }) {
 }
 
 Card.propTypes = {
-  card: PropTypes.object.isRequired,
+  card: PropTypes.shape({
+    id: PropTypes.number,
+    message: PropTypes.string.isRequired,
+    likes: PropTypes.number
+  }).isRequired,
   onLike: PropTypes.func.isRequired,
   onDelete: PropTypes.func
 }
